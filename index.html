@@ -42,17 +42,17 @@
         
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
         th { font-size: 0.85rem; text-transform: uppercase; color: var(--text-light); }
         
         input[type="text"], input[type="number"], select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 5px; background: #F8FAFC; }
         
-        .grade-cell { display: flex; align-items: center; gap: 6px; }
+        .grade-cell { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
         .grade-cell input[type="number"] { width: 60px; text-align: center; }
         .grade-cell input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); }
         
         .btn-add { width: 100%; padding: 12px; margin-top: 10px; background: none; border: 2px dashed var(--border); color: var(--text-light); border-radius: 6px; cursor: pointer; font-weight: 600; }
-        .btn-del { background: none; border: none; color: var(--text-light); cursor: pointer; font-size: 1.2rem; }
+        .btn-del { background: none; border: none; color: var(--text-light); cursor: pointer; font-size: 1.2rem; margin-top: 4px;}
 
         .result-box { text-align: center; padding: 20px; border-radius: 8px; background: #F1F5F9; margin-bottom: 20px; border: 1px solid var(--border);}
         .result-grade { font-size: 4rem; font-weight: bold; line-height: 1; margin: 15px 0; }
@@ -65,11 +65,10 @@
         .validation-list { list-style: none; font-size: 0.9rem; }
         .validation-list li { padding: 8px 12px; margin-bottom: 6px; border-radius: 5px; background: #ECFCCB; color: #166534; }
         .validation-list li.error { background: #FEF2F2; color: #991B1B; border-left: 4px solid var(--danger); }
-        .validation-list li.warning { background: #FFFBEB; color: #B45309; border-left: 4px solid var(--warning); }
         
         .prognosis { background: #EFF6FF; padding: 15px; border-radius: 8px; border: 1px solid #BFDBFE; }
         .prognosis input { width: 80px; display: inline-block; margin: 0 10px; }
-        .info-box { background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px; border-radius: 6px; font-size: 0.85rem; color: #475569; margin-top: 15px; }
+        .info-box { background: #F0FDF4; border: 1px solid #BBF7D0; padding: 10px; border-radius: 6px; font-size: 0.85rem; color: #166534; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -77,11 +76,11 @@
     <div class="header">
         <div>
             <h1>🎓 Abitur-Rechner Baden-Württemberg</h1>
-            <p>Exakte Berechnung nach Abitur 2026 Richtlinien (inkl. Günstigerprüfung für Leistungsfächer)</p>
+            <p>Konform nach AGVO • Inklusive automatischer Günstigerprüfung für Leistungsfächer</p>
         </div>
         <div class="btn-group">
             <button class="btn-save" onclick="saveProfile()">💾 Speichern</button>
-            <button class="btn-reset" onclick="loadDefaultData(true)">🔄 PDF-Daten laden</button>
+            <button class="btn-reset" onclick="loadDefaultData(true)">🔄 Standard-Daten laden</button>
             <button class="btn-clear" onclick="clearAll()">🗑️ Löschen</button>
         </div>
     </div>
@@ -99,7 +98,7 @@
                         <thead>
                             <tr>
                                 <th>Fach</th>
-                                <th>Typ</th>
+                                <th>Typ (LF/BF)</th>
                                 <th>HJ 1</th>
                                 <th>HJ 2</th>
                                 <th>HJ 3</th>
@@ -115,7 +114,7 @@
 
             <!-- BLOCK II -->
             <div class="card">
-                <h2>Block II: Abiturprüfungen <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-light)">(Faktor 4)</span></h2>
+                <h2>Block II: Abiturprüfungen <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-light)">(Immer Faktor 4)</span></h2>
                 <div class="table-responsive">
                     <table id="table-block2">
                         <thead>
@@ -147,7 +146,7 @@
                 </div>
 
                 <div class="info-box" id="lf-info">
-                    Bitte Noten eintragen, um die automatische Gewichtung zu sehen.
+                    Bitte Noten eintragen...
                 </div>
 
                 <div class="prognosis" id="prognosis-box" style="margin-top: 15px;">
@@ -167,6 +166,7 @@
     </div>
 
     <script>
+        // Startdaten des Nutzers
         const pdfSubjects = [
             { id: 1, name: 'Biologie', type: 'LF', grades: [12,13,12,13], counted: [true,true,true,true] },
             { id: 2, name: 'Mathematik', type: 'LF', grades: [9,10,9,12], counted: [true,true,true,true] },
@@ -175,7 +175,7 @@
             { id: 5, name: 'Englisch', type: 'BF', grades: [12,13,11,11], counted: [true,true,true,true] },
             { id: 6, name: 'Religion', type: 'BF', grades: [11,13,12,10], counted: [true,true,true,true] },
             { id: 7, name: 'Sport', type: 'BF', grades: [12,12,12,11], counted: [true,true,true,true] },
-            { id: 8, name: 'Politik', type: 'BF', grades: [10,10,10,10], counted: [false,false,true,false] }, // Aufgefüllt für 40 Kurse Check
+            { id: 8, name: 'Politik', type: 'BF', grades: [10,10,10,10], counted: [false,false,true,false] }, 
             { id: 9, name: 'Geographie', type: 'BF', grades: [11,11,11,11], counted: [true,false,false,false] },
             { id: 10, name: 'Physik', type: 'BF', grades: [15,15,13,13], counted: [true,true,true,true] },
             { id: 11, name: 'Kunst', type: 'BF', grades: [11,11,10,10], counted: [true,false,true,false] }
@@ -189,7 +189,7 @@
             { id: 5, name: 'Religion', type: 'mündlich', grade: 15 }
         ];
 
-        const STORAGE_PREFIX = 'abi_v5_'; 
+        const STORAGE_PREFIX = 'abi_v6_'; 
         let subjects = [];
         let exams = [];
 
@@ -206,7 +206,7 @@
         }
 
         function loadDefaultData(force = false) {
-            if(force && !confirm("PDF-Daten laden? Deine Eingaben werden überschrieben.")) return;
+            if(force && !confirm("Standard-Daten laden? Deine Eingaben werden überschrieben.")) return;
             subjects = JSON.parse(JSON.stringify(pdfSubjects));
             exams = JSON.parse(JSON.stringify(pdfExams));
             saveAuto(); renderAll();
@@ -221,7 +221,7 @@
             renderAll();
         }
 
-        function saveProfile() { alert("💾 Profil gespeichert!"); }
+        function saveProfile() { alert("💾 Deine Noten wurden sicher im Browser gespeichert!"); }
         function saveAuto() {
             localStorage.setItem(STORAGE_PREFIX + 'auto_subjects', JSON.stringify(subjects));
             localStorage.setItem(STORAGE_PREFIX + 'auto_exams', JSON.stringify(exams));
@@ -237,10 +237,13 @@
                 const tr = document.createElement('tr');
                 let html = `
                     <td><input type="text" value="${sub.name}" onchange="updateSub(${sIdx}, 'name', this.value)"></td>
-                    <td><select onchange="updateSub(${sIdx}, 'type', this.value)">
-                        <option value="LF" ${sub.type === 'LF' ? 'selected' : ''}>LF</option>
-                        <option value="BF" ${sub.type === 'BF' ? 'selected' : ''}>BF</option>
-                    </select></td>
+                    <td>
+                        <select onchange="updateSub(${sIdx}, 'type', this.value)">
+                            <option value="LF" ${sub.type === 'LF' ? 'selected' : ''}>Leistungsfach (LF)</option>
+                            <option value="BF" ${sub.type === 'BF' ? 'selected' : ''}>Basisfach (BF)</option>
+                        </select>
+                        <div id="badge-${sIdx}" style="margin-top: 5px;"></div>
+                    </td>
                 `;
 
                 for(let i=0; i<4; i++) {
@@ -281,15 +284,16 @@
         function addSubject() { subjects.push({ id: Date.now(), name: '', type: 'BF', grades: ['','','',''], counted: [false,false,false,false] }); renderSubjects(); }
         function removeSub(idx) { subjects.splice(idx, 1); saveAuto(); renderSubjects(); }
 
-        // --- KORRIGIERTE BERECHNUNG NACH ABITUR 2026 ---
+        // --- BERECHNUNG MIT SICHTBARER GÜNSTIGERPRÜFUNG ---
         function calculate() {
-            let singlePointsSum = 0; // Summe ALLER eingebrachten Kurse (Faktor 1)
+            let singlePointsSum = 0; 
             let countedCourses = 0;
             let ukLF = 0, ukTotal = 0, hasZero = false;
+            
+            // 1. Sammle alle LFs und berechne deren Einzelpunkte
             let lfCandidates = [];
 
-            // 1. Alle Kurse einzeln aufsummieren und LFs sammeln
-            subjects.forEach(sub => {
+            subjects.forEach((sub, sIdx) => {
                 let isLF = sub.type === 'LF';
                 let currentLfPoints = 0;
 
@@ -305,42 +309,56 @@
                     }
                 }
                 
-                if (isLF && currentLfPoints > 0) {
-                    lfCandidates.push({ name: sub.name, points: currentLfPoints });
+                if (isLF) {
+                    lfCandidates.push({ index: sIdx, name: sub.name, points: currentLfPoints });
                 }
             });
 
-            // 2. Günstigerprüfung: Die zwei LFs mit den höchsten Punkten finden
+            // 2. Finde die zwei besten LFs
             lfCandidates.sort((a, b) => b.points - a.points);
+            let bestTwoIndices = lfCandidates.slice(0, 2).map(lf => lf.index);
             
-            let bestTwoLFs = lfCandidates.slice(0, 2);
             let doubleWeightPoints = 0;
             let lfNames = [];
 
-            bestTwoLFs.forEach(lf => {
-                doubleWeightPoints += lf.points;
-                lfNames.push(lf.name || "Unbenanntes LF");
+            // 3. Update die Labels im HTML (damit der Nutzer sieht, was passiert)
+            subjects.forEach((sub, sIdx) => {
+                const badgeEl = document.getElementById(`badge-${sIdx}`);
+                if (!badgeEl) return;
+
+                if (sub.type === 'LF') {
+                    if (bestTwoIndices.includes(sIdx)) {
+                        badgeEl.innerHTML = '<span style="font-size:0.75rem; background:var(--primary); color:white; padding:3px 6px; border-radius:4px; font-weight:bold;">Wird 2x gewichtet</span>';
+                        let found = lfCandidates.find(lf => lf.index === sIdx);
+                        if(found) {
+                            doubleWeightPoints += found.points;
+                            lfNames.push(found.name || "Unbenanntes LF");
+                        }
+                    } else {
+                        badgeEl.innerHTML = '<span style="font-size:0.75rem; background:#E2E8F0; color:#475569; padding:3px 6px; border-radius:4px;">Wird 1x gewichtet</span>';
+                    }
+                } else {
+                    badgeEl.innerHTML = '';
+                }
             });
 
-            // P = Summe aller Kurse (1x) + Summe der zwei besten LFs (nochmal 1x dazu) = 2x best LF + 1x Rest
+            // Formel: E I = P * 40 / 48  (wobei P = alle Kurse 1x + die besten zwei LFs noch einmal 1x obendrauf)
             let P = singlePointsSum + doubleWeightPoints;
-
-            // Formel exakt wie im Bild: P * 40 / 48
             let block1Total = 0;
             if (countedCourses > 0) {
                 block1Total = Math.round((P * 40) / 48);
                 if (block1Total > 600) block1Total = 600;
             }
 
-            // Info an den User ausgeben
+            // Text-Info anpassen
             const lfInfo = document.getElementById('lf-info');
-            if (bestTwoLFs.length > 0) {
-                lfInfo.innerHTML = `<b>Günstigerprüfung aktiv:</b> Von deinen Leistungsfächern wurden <b>${lfNames.join(' und ')}</b> als die punktbesten ermittelt und automatisch doppelt gewichtet. Alle anderen Fächer zählen einfach.`;
+            if (lfNames.length > 0) {
+                lfInfo.innerHTML = `🌟 <b>Automatik aktiv:</b> Deine Leistungsfächer <b>${lfNames.join(' und ')}</b> liefern die besten Noten. Der Rechner hat diese zwei Fächer automatisch doppelt gewichtet! (Alle anderen Kurse zählen einfach).`;
             } else {
-                lfInfo.innerHTML = `Bitte Fächer eintragen und Kurse ankreuzen.`;
+                lfInfo.innerHTML = `Bitte Fächer eintragen...`;
             }
 
-            // Block II berechnen
+            // Block II (immer Faktor 4)
             let pII = 0, examUK = 0, examZero = false, examsDone = 0;
             exams.forEach(ex => {
                 if(ex.grade !== '') {
@@ -353,13 +371,13 @@
 
             let totalPoints = block1Total + pII;
 
-            // UI Updates
+            // UI
             document.getElementById('course-counter').innerText = `${countedCourses} / 40 Kurse eingebracht`;
             document.getElementById('res-b1').innerText = block1Total;
             document.getElementById('res-b2').innerText = pII;
             document.getElementById('res-total').innerText = totalPoints;
 
-            // Regeln checken
+            // Validierung
             const rulesUI = document.getElementById('validation-rules');
             rulesUI.innerHTML = '';
             
@@ -382,14 +400,13 @@
                 addRule(`Block II: Mind. 100 Punkte`, pII < 100 && examsDone === 5);
             }
 
-            // Note setzen (Tabelle 1 zu 1 als Formel abgebildet)
+            // Note (Tabelle)
             const gradeEl = document.getElementById('final-grade');
             let grade = "---";
             if(totalPoints >= 300) {
                 let exactGrade = (17/3) - (totalPoints/180);
                 if (exactGrade < 1.0) exactGrade = 1.0;
                 grade = (Math.floor(exactGrade * 10) / 10).toFixed(1);
-                
                 gradeEl.className = "result-grade " + (grade <= 2.5 ? 'color-green' : grade <= 3.7 ? 'color-orange' : 'color-red');
             } else {
                 gradeEl.className = "result-grade color-red";
@@ -413,7 +430,7 @@
 
             const needed = reqTotal - b1;
             if (needed > 300) resDiv.innerHTML = `<span class="color-red"><b>Nicht erreichbar!</b> Du benötigst ${needed} Punkte in Block II (max. 300).</span>`;
-            else if (needed <= 0) resDiv.innerHTML = `<span class="color-green"><b>Sicher!</b> Du hast die Note allein durch Block I schon erreicht.</span>`;
+            else if (needed <= 0) resDiv.innerHTML = `<span class="color-green"><b>Sicher!</b> Du hast die Note allein durch Block I erreicht.</span>`;
             else resDiv.innerHTML = `Für <b>${target.toFixed(1)}</b> fehlen <b>${needed} Punkte</b> in Block II.<br>➔ Das sind ø <b>${(needed/20).toFixed(1)} Notenpunkte</b> pro Abiturprüfung.`;
         }
 
